@@ -1,3 +1,4 @@
+###Quick script to run a show command against a short list of IPs dump the output to a csv file#####
 import paramiko
 import time
 import getpass
@@ -24,7 +25,7 @@ def f5_ssh_login(host, username, password, port=22):
         shell = ssh.invoke_shell()
         time.sleep(1)
         #shell.send("show ntp status\n")
-        shell.send("list /sys sshd all-properties\n")
+        shell.send("list /sys sshd all-properties\n") ########Commands go here. Multiple commands will work \n  needed for each command#####
         time.sleep(2)
         
         output = ""
