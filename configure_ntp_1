@@ -1,0 +1,40 @@
+from netmiko import ConnectHandler
+import getpass
+
+# Prompt user for credentials and router IP
+router_ip = input("Enter the router IP address: ")
+username = input("Enter your SSH username: ")
+password = getpass.getpass("Enter your SSH password: ")
+
+# Define the device dictionary for Netmiko
+cisco_device = {
+    "device_type": "cisco_ios",
+    "host": router_ip,
+    "username": username,
+    "password": password,
+}
+
+# List of configuration commands
+ntp_commands = [
+    "ntp server time.nist.gov",
+    "clock timezone EDT -4",  # Adjust to your local timezone if needed
+]
+
+try:
+    print(f"\nConnecting to {router_ip}...")
+    net_connect = ConnectHandler(**cisco_device)
+
+    print("Entering configuration mode...")
+    net_connect.send_config_set(ntp_commands)
+
+    print("Saving configuration...")
+    net_connect.save_config()
+
+    print("NTP configuration complete. Verifying...\n")
+    output = net_connect.send_command("show ntp associations")
+    print(output)
+
+    net_connect.disconnect()
+
+except Exception as e:
+    print(f"Error: {e}")
