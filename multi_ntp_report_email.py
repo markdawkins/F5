@@ -17,9 +17,9 @@ router_ips = [
 username = input("Enter your SSH username: ")
 password = getpass.getpass("Enter your SSH password: ")
 sender_email = "code.lab.072025@gmail.com"  # Replace with your Gmail address
-receiver_email = "mark.dawkins@gmail.com"
+receiver_email = "sender_email@gmail.com"
 #email_password = getpass.getpass("Enter the email password (App Password recommended): ")
-email_password = "zmwx obcm xwqe fzdc"
+email_password = "email_password"
 
 
 # ===== OUTPUT FILE =====
