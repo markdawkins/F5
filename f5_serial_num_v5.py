@@ -14,22 +14,33 @@ def get_f5_serial(host, username, password):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(host, username=username, password=password)
 
-        # Run tmsh command
-        stdin, stdout, stderr = ssh.exec_command("tmsh show sys hardware | grep -i 'Chassis Serial'")
+        # Run tmsh command (without grep)
+        stdin, stdout, stderr = ssh.exec_command("tmsh show sys hardware")
 
         output = stdout.read().decode().strip()
         error_output = stderr.read().decode().strip()
         ssh.close()
 
-        # If there's no output, raise an error
-        if not output:
-            if error_output:
-                return f"Command error: {error_output}"
-            else:
-                return "Error: No output from command (serial number not found)."
+        if error_output:
+            return f"Command error: {error_output}"
 
-        # Example line: "Chassis Serial  : 1234XYZ"
-        serial_number = output.split(":")[-1].strip() if ":" in output else output
+        if not output:
+            return "Error: No output from command (serial number not found)."
+
+        # Search for "Chassis Serial" line
+        serial_number = None
+        for line in output.splitlines():
+            if "Chassis Serial" in line:
+                parts = line.split(":")
+                if len(parts) > 1:
+                    serial_number = parts[1].strip()
+                else:
+                    serial_number = line.strip()
+                break
+
+        if not serial_number:
+            return "Error: Serial number not found in output."
+
         return serial_number
 
     except Exception as e:
