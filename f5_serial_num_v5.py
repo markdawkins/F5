@@ -18,14 +18,22 @@ def get_f5_serial(host, username, password):
         stdin, stdout, stderr = ssh.exec_command("tmsh show sys hardware | grep -i 'Chassis Serial'")
 
         output = stdout.read().decode().strip()
+        error_output = stderr.read().decode().strip()
         ssh.close()
+
+        # If there's no output, raise an error
+        if not output:
+            if error_output:
+                return f"Command error: {error_output}"
+            else:
+                return "Error: No output from command (serial number not found)."
 
         # Example line: "Chassis Serial  : 1234XYZ"
         serial_number = output.split(":")[-1].strip() if ":" in output else output
         return serial_number
 
     except Exception as e:
-        return f"Error: {e}"
+        return f"Connection/Execution Error: {e}"
 
 def log_serial_to_csv(host, serial):
     """Append timestamp, host, and serial to CSV log file."""
@@ -44,7 +52,8 @@ if __name__ == "__main__":
     # Get serial number
     serial = get_f5_serial(host, username, password)
 
-    # Log to CSV
-    log_serial_to_csv(host, serial)
+    # Print result to screen
+    print(f"Result for {host}: {serial}")
 
-    print(f"Serial for {host}: {serial} (logged to {CSV_FILE})")
+    # Log to CSV (even errors, so you know it was attempted)
+    log_serial_to_csv(host, serial)
