@@ -1,0 +1,66 @@
+1. Establish a Session and Access the Shell
+bash
+# 1. SSH to the BIG-IP as admin
+ssh admin@<f5_mgmt_ip>
+
+# 2. Enter the TMSH shell and become root
+tmsh
+run util bash
+# -OR- from the admin CLI directly:
+bash
+su -
+2. Locate and Backup the Management SSHD Config
+The management interface uses a separate sshd process and configuration file.
+
+bash
+# The config file is located at:
+cd /etc/sshd
+
+# Make a backup of the original config
+cp sshd_config sshd_config.backup.$(date +%Y%m%d)
+3. Edit the SSH Configuration File
+Use a text editor like vi to modify the sshd_config file.
+
+bash
+vi /etc/sshd/sshd_config
+4. Modify the Ciphers Line
+Find the line that starts with Ciphers. It might be commented out (#Ciphers...) or already active.
+
+To specify a custom list: Replace or add the line with your desired, space-separated list of ciphers. Always include a known, strong cipher that your SSH client uses.
+
+Example (Restrict to strong, modern ciphers):
+
+bash
+Ciphers aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+To see the default list: If the line is commented out, you can uncomment it and modify it. The system will use its internal defaults if the line is absent or commented.
+
+Common, secure ciphers to use:
+
+aes256-gcm@openssh.com
+
+aes128-gcm@openssh.com
+
+aes256-ctr
+
+aes192-ctr
+
+aes128-ctr
+
+chacha20-poly1305@openssh.com
+
+Insecure ciphers to remove (examples):
+
+aes256-cbc
+
+aes128-cbc
+
+3des-cbc
+
+Any cipher ending in -cbc
+
+5. Save the File and Restart the Management SSHD Service
+After saving the file in vi (:wq), you must restart the management sshd service for the changes to take effect.
+
+bash
+# Restart the management sshd service
+systemctl restart sshd.service
